@@ -1,24 +1,26 @@
-const dotenv = require('dotenv')
-dotenv.config()
+const dotenv = require("dotenv");
+dotenv.config();
 
-const cors = require('cors')
+const cookieParser = require("cookie-parser");
 
-const connectToDb = require('./db/db')
+const cors = require("cors");
+
+const connectToDb = require("./db/db");
 connectToDb();
 
-const express = require('express')
+const express = require("express");
 
-const userRoutes = require('./routes/user.routes')
+const userRoutes = require("./routes/user.routes");
 
-const app = express()
-app.use(cors())
-app.use(express.json())
+const app = express();
+app.use(cors());
+app.use(express.json());
+app.use(cookieParser());
 
+app.get("/", (req, res) => {
+  res.send("hello");
+});
 
-app.get('/',(req,res)=>{
-    res.send("hello")
-})
+app.use("/users", userRoutes);
 
-app.use('/users',userRoutes)
-
-module.exports = app 
+module.exports = app;

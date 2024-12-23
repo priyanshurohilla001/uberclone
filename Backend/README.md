@@ -110,3 +110,67 @@ Log in a user by providing email and password. Returns a token and user details 
 ### Validation Rules
 - `email`: Valid email format.
 - `password`: At least 6 characters.
+
+## Profile
+
+### Endpoint
+`GET /users/profile`
+
+### Description
+Get the profile of the authenticated user.
+
+### Request Headers
+- `Authorization`: Bearer token
+
+### Success Response
+- **Status Code:** `200 OK`
+- **Body:**
+  ```json
+  {
+    "user": {
+      "fullname": {
+        "firstname": "John",
+        "lastname": "Doe"
+      },
+      "email": "example@example.com"
+    }
+  }
+  ```
+
+### Error Response
+- **Status Code:** `401 Unauthorized`
+- **Body:**
+  ```json
+  {
+    "message": "unauthorized"
+  }
+  ```
+
+## Logout
+
+### Endpoint
+`GET /users/logout`
+
+### Description
+Log out the authenticated user by invalidating the token.
+
+### Request Headers
+- `Authorization`: Bearer token
+
+### Success Response
+- **Status Code:** `200 OK`
+- **Body:**
+  ```json
+  {
+    "message": "Logged out"
+  }
+  ```
+
+### Error Response
+- **Status Code:** `401 Unauthorized`
+- **Body:**
+  ```json
+  {
+    "message": "unauthorized"
+  }
+  ```

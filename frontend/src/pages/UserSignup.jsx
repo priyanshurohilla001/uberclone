@@ -1,26 +1,48 @@
-import React, { useState } from "react";
-
+import React, { useContext, useState } from "react";
+import axios from "axios";
+import { UserDataContext } from "../contexts/UserContext";
 import uberLogoBlack from "../assets/uberLogoDark.png";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 const UserSignup = () => {
   const [firstname, setfirstname] = useState("");
   const [lastname, setlastname] = useState("");
   const [email, setemail] = useState("");
   const [password, setpassword] = useState("");
-  const [userData, setuserData] = useState({});
 
-  const submitHandler = (e) => {
+  const navigate = useNavigate();
+
+  const { user, setuser } = useContext(UserDataContext);
+
+  const submitHandler = async (e) => {
     e.preventDefault();
-    setuserData({
+    const newUser = {
       fullname: {
         firstname,
         lastname,
       },
       email,
       password,
-    });
-    console.log(userData);
+    };
+
+    const serverUrl = import.meta.env.VITE_SERVER_URL;
+
+    try {
+      const response = await axios.post(`${serverUrl}/users/register`, newUser);
+
+      if (response.status === 201) {
+        const data = response.data;
+
+        setuser(data.user);
+
+        localStorage.setItem("token", data.token);
+
+        navigate("/home");
+      }
+    } catch (error) {
+      console.log(error);
+    }
+
     setfirstname("");
     setlastname("");
     setemail("");
@@ -86,7 +108,7 @@ const UserSignup = () => {
               required
             />
             <button className="bg-black mt-5 rounded text-white w-full p-4 font-semibold">
-              Login
+              Create Your account
             </button>
           </form>
           <div className="mt-4">

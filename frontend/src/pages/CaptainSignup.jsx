@@ -86,7 +86,7 @@ const CaptainSignup = () => {
               required
             />
             <button className="bg-black mt-5 rounded text-white w-full p-4 font-semibold">
-              Login
+              Create Your account
             </button>
           </form>
           <div className="mt-4">

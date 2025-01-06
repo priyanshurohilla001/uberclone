@@ -1,8 +1,8 @@
-const mongoose = require("mongoose");
-const bcrypt = require("bcrypt");
-const jwt = require("jsonwebtoken");
+import { Schema, model } from "mongoose";
+import { compare, hash } from "bcrypt";
+import jwt from "jsonwebtoken";
 
-const captainSchema = new mongoose.Schema({
+const captainSchema = new Schema({
   fullname: {
     firstname: {
       type: String,
@@ -76,13 +76,13 @@ captainSchema.methods.generateAuthToken = function () {
 };
 
 captainSchema.methods.comparePassword = async function (password) {
-  return await bcrypt.compare(password, this.password);
+  return await compare(password, this.password);
 };
 
 captainSchema.statics.hashPassword = async function (password) {
-  return await bcrypt.hash(password, 10);
+  return await hash(password, 10);
 };
 
-const captainModel = mongoose.model("captain", captainSchema);
+const captainModel = model("captain", captainSchema);
 
-module.exports = captainModel;
+export default captainModel;

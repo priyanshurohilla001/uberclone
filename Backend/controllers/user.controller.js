@@ -1,10 +1,10 @@
-const userModel = require("../modals/user.modal");
-const userService = require("../services/user.service");
-const { validationResult } = require("express-validator");
-const jwt = require("jsonwebtoken");
-const BlacklistTokenModel = require("../modals/blacklistToken.modal");
+import userModel from "../modals/user.modal.js";
+import { createUser } from "../services/user.service.js";
+import { validationResult } from "express-validator";
+import jwt from "jsonwebtoken";
+import BlacklistTokenModel from "../modals/blacklistToken.modal.js";
 
-module.exports.registerUser = async (req, res, next) => {
+export async function registerUserController(req, res, next) {
   const errors = validationResult(req);
 
   if (!errors.isEmpty()) {
@@ -21,7 +21,7 @@ module.exports.registerUser = async (req, res, next) => {
 
   const hashedPassword = await userModel.hashPassword(password);
 
-  const user = await userService.createUser({
+  const user = await createUser({
     firstname: fullname.firstname,
     lastname: fullname.lastname,
     email,
@@ -31,9 +31,9 @@ module.exports.registerUser = async (req, res, next) => {
   const token = user.generateAuthToken();
 
   res.status(201).json({ token, user });
-};
+}
 
-module.exports.loginUser = async (req, res, next) => {
+export async function loginUserController(req, res, next) {
   const errors = validationResult(req);
 
   if (!errors.isEmpty()) {
@@ -59,13 +59,13 @@ module.exports.loginUser = async (req, res, next) => {
   res.cookie("token", token);
 
   return res.status(200).json({ user, token });
-};
+}
 
-module.exports.getUserProfile = async (req, res, next) => {
+export async function getUserProfileController(req, res, next) {
   return res.status(200).json(req.user);
-};
+}
 
-module.exports.logoutUser = async (req, res, next) => {
+export async function logoutUserController(req, res, next) {
   res.clearCookie("token");
 
   const token = req.cookies.token || req.headers.authorization?.split(" ")[1];
@@ -73,4 +73,4 @@ module.exports.logoutUser = async (req, res, next) => {
   await BlacklistTokenModel.create({ token });
 
   res.status(200).json({ message: "Logged out" });
-};
+}

@@ -1,6 +1,6 @@
-const captainModel = require("../modals/captain.modal");
+import captainModel from "../modals/captain.modal.js";
 
-module.exports.createCaptain = async ({
+export async function createCaptain({
   firstname,
   lastname,
   email,
@@ -9,7 +9,7 @@ module.exports.createCaptain = async ({
   plate,
   capacity,
   vehicleType,
-}) => {
+}) {
   if (
     !firstname ||
     !password ||
@@ -38,4 +38,4 @@ module.exports.createCaptain = async ({
   });
 
   return captain;
-};
+}

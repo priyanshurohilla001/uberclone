@@ -1,9 +1,9 @@
-const { validationResult } = require("express-validator");
-const captainModel = require("../modals/captain.modal");
-const captainService = require("../services/captain.service");
-const BlacklistTokenModel = require("../modals/blacklistToken.modal");
+import { validationResult } from "express-validator";
+import captainModel from "../modals/captain.modal.js";
+import { createCaptain } from "../services/captain.service.js";
+import BlacklistTokenModel from "../modals/blacklistToken.modal.js";
 
-module.exports.registerCaptain = async (req, res, next) => {
+export async function registerCaptainController(req, res, next) {
   const errors = validationResult(req);
 
   if (!errors.isEmpty()) {
@@ -20,7 +20,7 @@ module.exports.registerCaptain = async (req, res, next) => {
 
   const hashedPassword = await captainModel.hashPassword(password);
 
-  const captain = await captainService.createCaptain({
+  const captain = await createCaptain({
     firstname: fullname.firstname,
     lastname: fullname.firstname,
     email,
@@ -34,9 +34,9 @@ module.exports.registerCaptain = async (req, res, next) => {
   const token = captain.generateAuthToken();
 
   res.status(201).json({ token, captain });
-};
+}
 
-module.exports.loginCaptain = async (req, res, next) => {
+export async function loginCaptainController(req, res, next) {
   const errors = validationResult(req);
 
   if (!errors.isEmpty()) {
@@ -59,16 +59,18 @@ module.exports.loginCaptain = async (req, res, next) => {
 
   const token = captain.generateAuthToken();
 
+  captain.password = undefined;
+
   res.cookie("token", token);
 
   return res.status(200).json({ token, captain });
-};
+}
 
-module.exports.getCaptainProfile = async (req, res, next) => {
+export async function getCaptainProfileController(req, res, next) {
   return res.status(200).json({ captain: req.captain });
-};
+}
 
-module.exports.logoutCaptain = async (req, res, next) => {
+export async function logoutCaptainController(req, res, next) {
   const token = req.cookies.token || req.headers.authorization?.split(" ")[1];
 
   await BlacklistTokenModel.create({ token });
@@ -76,4 +78,31 @@ module.exports.logoutCaptain = async (req, res, next) => {
   res.clearCookie("token");
 
   res.status(200).json({ message: "logout successfully" });
-};
+}
+
+export async function updateLocationSocketController(req, res) {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+
+  const { socketId, location } = req.body;
+
+  const id = req.captain._id;
+
+  try {
+    const captain = await captainModel.updateOne(
+      { _id: id },
+      {
+        socketId: socketId,
+        location: location,
+      }
+    );
+  } catch (error) {
+    return res.status(400).json({ errors: error });
+  }
+
+  return res
+    .status(200)
+    .json({ message: "Location and socket id updated Successfully" });
+}

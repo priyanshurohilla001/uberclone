@@ -1,46 +1,39 @@
-const rideModel = require("../modals/ride.modal.js");
-const mapService = require("./maps.service.js");
+import { getAddressCoordinates, getDistTime } from "./maps.service.js";
 
-async function getfare( origin, destination, vehicleType) {
+import captainModel from "../modals/captain.modal.js";
+import rideModel from "../modals/ride.modal.js"
 
-  if (!origin || !destination || !vehicleType) {
-    throw new Error("Origin, destination and VehicleType are required");
+const getfare = async (origin, destination) => {
+  if (!origin || !destination) {
+    throw new Error("Origin and destination are required");
   }
 
   try {
-    const originCord = await mapService.getAddressCoordinates(origin);
-    const destinationCord = await mapService.getAddressCoordinates(destination);
-    const distTime = await mapService.getDistTime(originCord, destinationCord);
+    const originCord = await getAddressCoordinates(origin);
+    const destinationCord = await getAddressCoordinates(destination);
+    const distTime = await getDistTime(originCord, destinationCord);
 
     const dist = distTime.distance / 1000;
-    let fare;
-    switch (vehicleType) {
-      case "auto":
-      fare = Math.round(dist * 10);
-      break;
-      case "motorcycle":
-      fare = Math.round(dist * 5);
-      break;
-      case "car":
-      fare = Math.round(dist * 15);
-      break;
-      default:
-      throw new Error("Invalid vehicle type");
-    }
+    const fare = {
+      auto: Math.round(dist * 10),
+      motorcycle: Math.round(dist * 5),
+      car: Math.round(dist * 15),
+    };
     return fare;
   } catch (error) {
     throw new Error(error.message);
   }
-}
+};
 
+const _getfare = getfare;
+export { _getfare as getfare };
 
-
-module.exports.createRide = async ({
+export async function createRide({
   user,
   origin,
   destination,
   vehicleType,
-}) => {
+}) {
   if (!user || !origin || !destination || !vehicleType) {
     throw new Error("User, origin, destination and VehicleType are required");
   }
@@ -48,20 +41,44 @@ module.exports.createRide = async ({
   const otp = Math.floor(100000 + Math.random() * 900000);
 
   try {
-    const fare = await getfare( origin, destination, vehicleType );
+    const fareAll = await getfare(origin, destination);
+    const fare = fareAll[vehicleType];
 
-    const ride = rideModel.create({
-      user,
+    const ride = await rideModel.create({
+      user: user._id,
       origin,
       destination,
       fare,
       otp,
     });
-    
+
+    const originCord = await getAddressCoordinates(origin);
+
+    const captains = await captainModel.find({
+      location: {
+        $geoWithin: {
+          $centerSphere: [[originCord.lat, originCord.lng], 10 / 6378.1],
+        },
+      },
+    });
+
+    console.log(user);
+
+    const rideData = {
+      origin,
+      destination,
+      fare,
+      user,
+    };
+
+    if (captains.length > 0) {
+      captains.forEach((captain) => {
+        to(captain.socketId).emit("ridesInArea",rideData);
+      });
+    }
+
     return ride;
   } catch (error) {
     throw new Error(error.message);
   }
-};
-
-
+}

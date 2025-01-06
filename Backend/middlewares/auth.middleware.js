@@ -1,10 +1,10 @@
-const userModel = require("../modals/user.modal");
-const bcrypt = require("bcrypt");
-const jwt = require("jsonwebtoken");
-const BlacklistTokenModel = require("../modals/blacklistToken.modal");
-const captainModel = require("../modals/captain.modal");
+import userModel from "../modals/user.modal.js";
+import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
+import BlacklistTokenModel from "../modals/blacklistToken.modal.js";
+import captainModel from "../modals/captain.modal.js";
 
-module.exports.authUser = async (req, res, next) => {
+export async function authUser(req, res, next) {
   const token = req.cookies.token || req.headers.authorization?.split(" ")[1];
 
   if (!token) {
@@ -28,9 +28,9 @@ module.exports.authUser = async (req, res, next) => {
   } catch (error) {
     res.status(401).json({ message: "unauthorized" });
   }
-};
+}
 
-module.exports.authCaptain = async (req, res, next) => {
+export async function authCaptain(req, res, next) {
   const token = req.cookies.token || req.headers.authorization?.split(" ")[1];
 
   if (!token) {
@@ -44,11 +44,11 @@ module.exports.authCaptain = async (req, res, next) => {
   }
 
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const decoded = verify(token, process.env.JWT_SECRET);
     const captain = await captainModel.findById({ _id: decoded._id });
     req.captain = captain;
     return next()
   } catch (error) {
     return res.status(401).json({ message: "unauthorized" });
   }
-};
+}

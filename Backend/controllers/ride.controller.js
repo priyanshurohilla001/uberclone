@@ -1,22 +1,19 @@
-const { validationResult } = require("express-validator");
-const rideService = require("../services/ride.service");
+import { validationResult } from "express-validator";
+import { createRide, getfare } from "../services/ride.service.js";
 
-module.exports.createRide = async ( req, res ) => {
-
-  console.log("Reached Contoller ")
-
+export async function createRideController(req, res) {
   const errors = validationResult(req);
 
   if (!errors.isEmpty()) {
     return res.status(400).json({ errors: errors.array() });
   }
 
-  const user = req.user._id;
+  const user = req.user
 
   const { origin, destination, vehicleType } = req.body;
 
   try {
-    const ride = await rideService.createRide({
+    const ride = await createRide({
       user,
       origin,
       destination,
@@ -27,4 +24,21 @@ module.exports.createRide = async ( req, res ) => {
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
-};
+}
+
+export async function getFareController(req, res) {
+  const errors = validationResult(req);
+
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+
+  const { origin, destination } = req.query;
+
+  try {
+    const fare = await getfare(origin, destination);
+    res.status(200).json(fare);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+}

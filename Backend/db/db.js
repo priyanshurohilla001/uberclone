@@ -1,12 +1,11 @@
-const mongoose = require("mongoose");
+import { connect } from "mongoose";
 
 const connectToDb = () => {
-  mongoose
-    .connect(process.env.DB_CONNECT)
+  connect(process.env.DB_CONNECT)
     .then(() => {
       console.log("Connected to db");
     })
     .catch((err) => console.log(err));
 };
 
-module.exports = connectToDb;
+export default connectToDb;

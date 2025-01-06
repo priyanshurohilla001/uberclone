@@ -1,8 +1,8 @@
-const express = require("express");
-const router = express.Router();
-const { query, body } = require("express-validator");
-const authMiddleware = require("../middlewares/auth.middleware");
-const mapsController = require("../controllers/maps.controller");
+import { Router } from "express";
+const router = Router();
+import { query, body } from "express-validator";
+import { authUser } from "../middlewares/auth.middleware.js";
+import { getAddressCoordinatesController, getDistTimeController, getSuggestionsController } from "../controllers/maps.controller.js";
 
 router.get(
   "/get-coordinates",
@@ -10,8 +10,8 @@ router.get(
     .isString()
     .isLength({ min: 3 })
     .withMessage("Address must be a string with at least 3 characters"),
-  authMiddleware.authUser,
-  mapsController.getAddressCoordinates
+  authUser,
+  getAddressCoordinatesController
 );
 
 router.get(
@@ -26,8 +26,8 @@ router.get(
       .isLength({ min: 3 })
       .withMessage("Destination must be a string with at least 3 characters"),
   ],
-  authMiddleware.authUser,
-  mapsController.getDistTime
+  authUser,
+  getDistTimeController
 );
 
 router.get(
@@ -36,8 +36,8 @@ router.get(
     .isString()
     .isLength({ min: 3 })
     .withMessage("Address must be a string with at least 3 characters"),
-  authMiddleware.authUser,
-  mapsController.getSuggestions
+  authUser,
+  getSuggestionsController
 );
 
-module.exports = router;
+export default router;

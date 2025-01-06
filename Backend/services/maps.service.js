@@ -1,6 +1,6 @@
-const axios = require("axios");
+import axios from "axios";
 
-module.exports.getAddressCoordinates = async (address) => {
+export async function getAddressCoordinates(address) {
   if (!address) {
     throw new Error("Address is required");
   }
@@ -26,9 +26,9 @@ module.exports.getAddressCoordinates = async (address) => {
   } catch (error) {
     throw new Error("Error fetching data");
   }
-};
+}
 
-module.exports.getDistTime = async (origin, destination) => {
+export async function getDistTime(origin, destination) {
   if (!origin || !destination) {
     throw new Error("Origin and destination are required");
   }
@@ -36,7 +36,7 @@ module.exports.getDistTime = async (origin, destination) => {
   const url = `https://api.olamaps.io/routing/v1/distanceMatrix/basic?origins=${origin.lat},${origin.lng}&destinations=${destination.lat},${destination.lng}&api_key=${apiKey}`;
 
   try {
-    const response = await axios.get(url);
+    const response = await get(url);
 
     if (response.status !== 200) {
       throw new Error("Error fetching data");
@@ -53,9 +53,9 @@ module.exports.getDistTime = async (origin, destination) => {
   } catch (error) {
     throw new Error("Error fetching data");
   }
-};
+}
 
-module.exports.getSuggestions = async (query , location) => {
+export async function getSuggestions(query , location) {
   if (!query) {
     throw new Error("Query is required");
   }
@@ -68,7 +68,7 @@ module.exports.getSuggestions = async (query , location) => {
   }
 
   try {
-    const response = await axios.get(url);
+    const response = await get(url);
 
     if (response.status !== 200) {
       throw new Error("Error fetching data");

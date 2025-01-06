@@ -1,8 +1,8 @@
-const express = require("express");
-const router = express.Router();
-const { body } = require("express-validator");
-const authMiddleware = require("../middlewares/auth.middleware");
-const rideController = require("../controllers/ride.controller");
+import { Router } from "express";
+const router = Router();
+import { query, body } from "express-validator";
+import { authUser } from "../middlewares/auth.middleware.js";
+import { createRideController, getFareController } from "../controllers/ride.controller.js";
 
 router.post(
   "/create",
@@ -19,8 +19,24 @@ router.post(
       .isIn(["car", "motorcycle", "auto"])
       .withMessage("Vehicle type must be car, motorcycle or auto"),
   ],
-  authMiddleware.authUser,
-  rideController.createRide
+  authUser,
+  createRideController
 );
 
-module.exports = router;
+router.get(
+  "/fare",
+  [
+    query("origin")
+      .isString()
+      .isLength({ min: 3 })
+      .withMessage("Origin must be a string with at least 3 characters"),
+    query("destination")
+      .isString()
+      .isLength({ min: 3 })
+      .withMessage("Destination must be a string with at least 3 characters"),
+  ],
+  authUser,
+  getFareController
+);
+
+export default router;

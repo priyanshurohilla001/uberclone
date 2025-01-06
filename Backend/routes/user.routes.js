@@ -1,8 +1,8 @@
-const express = require("express");
-const router = express.Router();
-const { body } = require("express-validator");
-const userController = require("../controllers/user.controller");
-const authMiddleware = require("../middlewares/auth.middleware");
+import { Router } from "express";
+const router = Router();
+import { body } from "express-validator";
+import { registerUserController, loginUserController, getUserProfileController, logoutUserController } from "../controllers/user.controller.js";
+import { authUser } from "../middlewares/auth.middleware.js";
 
 router.post(
   "/register",
@@ -19,7 +19,7 @@ router.post(
       .isLength({ min: 6 })
       .withMessage("Password must be at least 6 characters long"),
   ],
-  userController.registerUser
+  registerUserController
 );
 
 router.post(
@@ -30,11 +30,11 @@ router.post(
       .isLength({ min: 6 })
       .withMessage("Password must be at least 6 characters long"),
   ],
-  userController.loginUser
+  loginUserController
 );
 
-router.get("/profile", authMiddleware.authUser, userController.getUserProfile);
+router.get("/profile", authUser, getUserProfileController);
 
-router.get("/logout", authMiddleware.authUser, userController.logoutUser);
+router.get("/logout", authUser, logoutUserController);
 
-module.exports = router;
+export default router;

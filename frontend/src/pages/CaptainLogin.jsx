@@ -1,22 +1,34 @@
-import React, { useState } from "react";
-import { Link } from "react-router-dom";
-import uberDriverDark from "../assets/uberDriverDark.png"
+import React, { useContext, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import uberDriverDark from "../assets/uberDriverDark.png";
+import axios from "axios";
+import {CaptainContextData} from "../contexts/CaptainContext"
 
 const CaptainLogin = () => {
   const [email, setemail] = useState("");
   const [pass, setpass] = useState("");
-  const [captainData, setcaptainData] = useState({});
 
-  const submitHandler = (e) => {
+  const navigate = useNavigate();
+
+  const { setcaptain} = useContext(CaptainContextData)
+
+  const submitHandler = async (e) => {
     e.preventDefault();
-    setcaptainData({
-      email : email,
-      pass : pass
+    const serverUrl = import.meta.env.VITE_SERVER_URL;
+
+    const res = await axios.post(`${serverUrl}/captains/login`, {
+      email: email,
+      password: pass,
     });
-    console.log(captainData)
-    setemail("");
-    setpass("");
-    
+
+    if (res.status === 200) {
+      const token = res.data.token;
+      setcaptain(res.data.captain);
+      localStorage.setItem("captainToken", token);
+      navigate("/captain-home");
+    }
+    // setemail("");
+    // setpass("");
   };
 
   return (
@@ -71,6 +83,6 @@ const CaptainLogin = () => {
       </div>
     </div>
   );
-}
+};
 
-export default CaptainLogin
+export default CaptainLogin;

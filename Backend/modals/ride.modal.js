@@ -1,13 +1,13 @@
-const mongoose = require("mongoose");
+import { Schema, model } from "mongoose";
 
-const rideSchema = mongoose.Schema({
+const rideSchema = Schema({
   user: {
-    type: mongoose.Schema.Types.ObjectId,
+    type: Schema.Types.ObjectId,
     ref: "user",
     required: true,
   },
   captain: {
-    type: mongoose.Schema.Types.ObjectId,
+    type: Schema.Types.ObjectId,
     ref: "captain",
   },
   origin: {
@@ -50,4 +50,4 @@ const rideSchema = mongoose.Schema({
   },
 });
 
-module.exports = mongoose.model("ride", rideSchema);
+export default model("ride", rideSchema);

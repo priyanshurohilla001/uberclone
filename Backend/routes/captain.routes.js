@@ -1,8 +1,8 @@
-const express = require("express");
-const router = express.Router();
-const { body } = require("express-validator");
-const captainController = require("../controllers/captain.controller");
-const { authCaptain } = require("../middlewares/auth.middleware");
+import { Router } from "express";
+const router = Router();
+import { body } from "express-validator";
+import { registerCaptainController, loginCaptainController, getCaptainProfileController, logoutCaptainController, updateLocationSocketController } from "../controllers/captain.controller.js";
+import { authCaptain } from "../middlewares/auth.middleware.js";
 
 router.post(
   "/register",
@@ -31,19 +31,42 @@ router.post(
       .isIn(["car", "motorcycle", "auto"])
       .withMessage("Invalid type of vehicle"),
   ],
-  captainController.registerCaptain
+  registerCaptainController
 );
 
-router.post("/login", [
-  body("email").isEmail().withMessage("Invalid email"),
-  body("password")
-    .isLength({ min: 6 })
-    .withMessage("password must be atleast 6 charcters"),
-],captainController.loginCaptain
+router.post(
+  "/login",
+  [
+    body("email").isEmail().withMessage("Invalid email"),
+    body("password")
+      .isLength({ min: 6 })
+      .withMessage("password must be atleast 6 charcters"),
+  ],
+  loginCaptainController
 );
 
-router.get("/profile",authCaptain ,captainController.getCaptainProfile )
+router.get("/profile", authCaptain, getCaptainProfileController);
 
-router.get("/logout",authCaptain , captainController.logoutCaptain)
+router.get("/logout", authCaptain, logoutCaptainController);
 
-module.exports = router;
+router.post(
+  "/updateLocationSocket",
+  [
+    body("socketId").isLength({
+      min: 20,
+      max: 20,
+    }).withMessage("Invalid Socket id"),
+    body("location.lat").isNumeric({
+      min : -90 ,
+      max : 90
+    }),
+    body("location.lng").isNumeric({
+      min : -180 ,
+      max : 180
+    })
+  ],
+  authCaptain,
+  updateLocationSocketController
+);
+
+export default router;

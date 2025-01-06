@@ -1,8 +1,8 @@
-const mongoose = require("mongoose");
-const jwt = require("jsonwebtoken");
-const bcrypt = require("bcrypt");
+import { Schema, model } from "mongoose";
+import jwt from "jsonwebtoken";
+import { compare, hash } from "bcrypt";
 
-const userSchema = new mongoose.Schema({
+const userSchema = new Schema({
   fullname: {
     firstname: {
       type: String,
@@ -38,13 +38,13 @@ userSchema.methods.generateAuthToken = function () {
 };
 
 userSchema.methods.comparePassword = async function (password) {
-  return await bcrypt.compare(password, this.password);
+  return await compare(password, this.password);
 };
 
 userSchema.statics.hashPassword = async function (password) {
-  return await bcrypt.hash(password, 10);
+  return await hash(password, 10);
 };
 
-const userModel = mongoose.model("user", userSchema);
+const userModel = model("user", userSchema);
 
-module.exports = userModel;
+export default userModel;

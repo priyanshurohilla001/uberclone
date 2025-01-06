@@ -1,23 +1,23 @@
-const dotenv = require("dotenv");
-dotenv.config();
+import { config } from "dotenv";
+config();
 
-const cookieParser = require("cookie-parser");
+import cookieParser from "cookie-parser";
 
-const cors = require("cors");
+import cors from "cors";
 
-const connectToDb = require("./db/db");
+import connectToDb from "./db/db.js";
 connectToDb();
 
-const express = require("express");
+import express, { json } from "express";
 
-const userRoutes = require("./routes/user.routes");
-const captainRoutes = require('./routes/captain.routes')
-const mapRoutes = require("./routes/maps.routes");
-const rideRoutes = require("./routes/ride.routes");
+import userRoutes from "./routes/user.routes.js";
+import captainRoutes from './routes/captain.routes.js';
+import mapRoutes from "./routes/maps.routes.js";
+import rideRoutes from "./routes/ride.routes.js";
 
 const app = express();
 app.use(cors());
-app.use(express.json());
+app.use(json());
 app.use(cookieParser());
 
 app.get("/", (req, res) => {
@@ -30,4 +30,4 @@ app.use("/maps", mapRoutes);
 app.use("/rides", rideRoutes);
 
 
-module.exports = app;
+export default app;

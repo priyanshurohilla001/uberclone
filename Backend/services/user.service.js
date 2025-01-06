@@ -1,11 +1,12 @@
-const userModel = require("../modals/user.modal");
+import userModel from "../modals/user.modal.js";
 
-module.exports.createUser = async ({
+
+export async function createUser({
   firstname,
   lastname,
   email,
   password,
-}) => {
+}) {
   if (!firstname || !email || !password) {
     throw new Error("All fields are required");
   }
@@ -20,4 +21,4 @@ module.exports.createUser = async ({
   });
 
   return user
-};
+}

@@ -24,24 +24,8 @@ const rideSchema = Schema({
   },
   status: {
     type: String,
-    enum: ["pending", "accepted", "completed", "cancelled"],
+    enum: ["pending", "accepted", "ongoing" , "completed", "cancelled"],
     default: "pending",
-  },
-  duration: {
-    type: Number,
-  },
-  distance: {
-    type: Number,
-  },
-
-  paymentId: {
-    type: String,
-  },
-  orderId: {
-    type: String,
-  },
-  signature: {
-    type: String,
   },
   otp: {
     type: String,

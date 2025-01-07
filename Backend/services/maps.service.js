@@ -1,4 +1,5 @@
 import axios from "axios";
+import captainModel from "../modals/captain.modal.js";
 
 export async function getAddressCoordinates(address) {
   if (!address) {
@@ -36,7 +37,7 @@ export async function getDistTime(origin, destination) {
   const url = `https://api.olamaps.io/routing/v1/distanceMatrix/basic?origins=${origin.lat},${origin.lng}&destinations=${destination.lat},${destination.lng}&api_key=${apiKey}`;
 
   try {
-    const response = await get(url);
+    const response = await axios.get(url);
 
     if (response.status !== 200) {
       throw new Error("Error fetching data");
@@ -55,7 +56,7 @@ export async function getDistTime(origin, destination) {
   }
 }
 
-export async function getSuggestions(query , location) {
+export async function getSuggestions(query, location) {
   if (!query) {
     throw new Error("Query is required");
   }
@@ -68,7 +69,7 @@ export async function getSuggestions(query , location) {
   }
 
   try {
-    const response = await get(url);
+    const response = await axios.get(url);
 
     if (response.status !== 200) {
       throw new Error("Error fetching data");
@@ -81,3 +82,24 @@ export async function getSuggestions(query , location) {
   }
 }
 
+export async function getCaptainInArea(lat, lng , vehicleType) {
+  // Check if latitude and longitude are within valid ranges
+  if (lat < -90 || lat > 90 || lng < -180 || lng > 180) {
+    throw new Error("Provide coordinates in a proper format");
+  }
+
+  try {
+    const captains = await captainModel.find({
+      "vehicle.vehicleType": vehicleType,
+      location: {
+        $geoWithin: {
+          $centerSphere: [[lat, lng], 10 / 6378.1],
+        },
+      },
+    });
+
+    return captains;
+  } catch (error) {
+    throw new Error("Captains not available");
+  }
+}

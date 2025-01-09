@@ -7,6 +7,7 @@ import {
 import { io } from "../server.js";
 import captainModel from "../modals/captain.modal.js";
 import rideModal from "../modals/ride.modal.js";
+import userModel from "../modals/user.modal.js";
 
 export async function createRideController(req, res) {
   const errors = validationResult(req);
@@ -109,30 +110,149 @@ export async function changeStatusTo(req, res) {
   console.log(rideId);
 
   async function accepted() {
-    const ride = await rideModal.findOneAndUpdate(
-      {
-        _id: rideId,
-        status: "pending",
-      },
-      {
-        captain: captain._id,
-        status: "accepted",
-      },
-      {
-        new: true,
-      }
-    ).select("+otp");
+    try {
+      const ride = await rideModal
+        .findOneAndUpdate(
+          {
+            _id: rideId,
+            status: "pending",
+          },
+          {
+            captain: captain._id,
+            status: "accepted",
+          },
+          {
+            new: true,
+          }
+        )
+        .select("+otp");
 
-    if (!ride) {
-      return res
-        .status(404)
-        .json({ msg: "ride id and current status doesnt match" });
-    } else {
-      return res.status(200).json(ride);
+      if (!ride) {
+        return res
+          .status(404)
+          .json({ msg: "ride id and current status  doesnt match" });
+      }
+
+      const userId = ride.user;
+
+      const user = await userModel.findById(userId);
+
+      io.to(user.socketId).emit("LookingForCaptain", { ride, captain }); // sending ride and captain details with otp to user
+
+      ride.otp = null;
+
+      return res.status(200).json({ ride, user });
+    } catch (error) {
+      return res.status(400).json({ error });
     }
   }
 
-  async function ongoing() {}
+  async function ongoing() {
+    try {
+      const { otp } = req.body;
+      if (!otp) {
+        return res.status(400).json({ msg: "Otp is not given" });
+      }
+
+      const ride = await rideModal.findOneAndUpdate(
+        {
+          _id: rideId,
+          status: "accepted",
+          otp,
+          captain: captain._id,
+        },
+        {
+          status: "ongoing",
+        },
+        {
+          new: true,
+        }
+      );
+
+      if (!ride) {
+        return res.status(404).json({
+          msg: "ride id , current status , otp and captain doesnt match",
+        });
+      }
+
+      const userId = ride.user;
+
+      const user = await userModel.findById(userId);
+
+      io.to(user.socketId).emit("UserVerifyCaptain", { ride, captain });
+
+      return res.status(200).json({ ride, user });
+    } catch (error) {
+      return res.status(400).json({ error });
+    }
+  }
+
+  async function completed() {
+    try {
+      const ride = await rideModal.findOneAndUpdate(
+        {
+          _id: rideId,
+          status: "ongoing",
+        },
+        {
+          status: "completed",
+        },
+        {
+          new: true,
+        }
+      );
+
+      if (!ride) {
+        return res.status(404).json({
+          msg: "ride id and current status doesnt match",
+        });
+      }
+
+      const userId = ride.user;
+
+      const user = await userModel.findById(userId);
+
+      io.to(user.socketId).emit("UserOngoingRide", { ride, captain });
+
+      return res.status(200).json({ ride, user });
+    } catch (error) {
+      return res.status(400).json({ error });
+    }
+  }
+
+  async function cancelled() {
+    try {
+      const ride = await rideModal.findOneAndUpdate(
+        {
+          _id: rideId,
+          captain: captain._id,
+          status: ["accepted", "ongoing"],
+        },
+        {
+          status: "cancelled",
+        },
+        {
+          new: true,
+        }
+      );
+
+      if (!ride) {
+        return res.status(404).json({
+          msg: "ride not found with current captain or ride is completed",
+        });
+      }
+
+      const userId = ride.user;
+
+      const user = await userModel.findById(userId);
+
+      io.to(user.socketId).emit("Cancelled", "Ride Cancelled by captain");
+
+      return res.status(200).json({ ride, user });
+    } catch (error) {
+      return res.status(400).json({ error });
+    }
+  }
 
   switch (status) {
     case "accepted":
@@ -140,12 +260,39 @@ export async function changeStatusTo(req, res) {
     case "ongoing":
       return ongoing();
     case "completed":
-      return res.json({ status: 3 });
+      return completed();
     case "cancelled":
-      return res.json({ status: 4 });
+      return cancelled();
     default:
       return res.json({
         msg: "Valid status are accepted , ongoing , completed , cancelled ",
       });
+  }
+}
+
+export async function captainCurrentRide(req, res) {
+  const errors = validationResult(req);
+
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+
+  const captain = req.captain._id;
+
+  try {
+    const ride = await rideModal.findOne({
+      captain: captain._id,
+      status: ["accepted", "ongoing"],
+    });
+
+    if (!ride) {
+      return res
+        .status(200)
+        .json({ msg: "Captain have no current active ride" });
+    }
+
+    return res.status(200).json(ride);
+  } catch (error) {
+    return res.status(400).json({ errors: error.message });
   }
 }

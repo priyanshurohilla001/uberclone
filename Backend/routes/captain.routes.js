@@ -1,8 +1,15 @@
 import { Router } from "express";
 const router = Router();
-import { body } from "express-validator";
-import { registerCaptainController, loginCaptainController, getCaptainProfileController, logoutCaptainController, updateLocationSocketController } from "../controllers/captain.controller.js";
+import { body, query } from "express-validator";
+import {
+  registerCaptainController,
+  loginCaptainController,
+  getCaptainProfileController,
+  logoutCaptainController,
+  updateLocationSocketController,
+} from "../controllers/captain.controller.js";
 import { authCaptain } from "../middlewares/auth.middleware.js";
+import { captainCurrentRide } from "../controllers/ride.controller.js";
 
 router.post(
   "/register",
@@ -52,21 +59,29 @@ router.get("/logout", authCaptain, logoutCaptainController);
 router.post(
   "/updateLocationSocket",
   [
-    body("socketId").isLength({
-      min: 20,
-      max: 20,
-    }).withMessage("Invalid Socket id"),
+    body("socketId")
+      .isLength({
+        min: 20,
+        max: 20,
+      })
+      .withMessage("Invalid Socket id"),
     body("location.lat").isNumeric({
-      min : -90 ,
-      max : 90
+      min: -90,
+      max: 90,
     }),
     body("location.lng").isNumeric({
-      min : -180 ,
-      max : 180
-    })
+      min: -180,
+      max: 180,
+    }),
   ],
   authCaptain,
   updateLocationSocketController
+);
+
+router.get(
+  "/currentride",
+  authCaptain,
+  captainCurrentRide
 );
 
 export default router;

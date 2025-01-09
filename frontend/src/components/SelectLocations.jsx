@@ -1,35 +1,56 @@
-import React, { useRef } from "react";
+import React, { useEffect, useRef } from "react";
 import { useState } from "react";
 import LocationSuggestion from "./LocationSuggestion";
 import axios from "axios";
 
-const SelectLocations = ({ setno , setridedata }) => {
-  const [isfull, setisfull] = useState(false);
-  const [origin, setorigin] = useState("");
-  const [destination, setdestination] = useState("");
+const SelectLocations = ({ setno, setridedata }) => {
+  const [isFull, setIsFull] = useState(false);
+  const [origin, setOrigin] = useState("");
+  const [destination, setDestination] = useState("");
 
-  const submitHandler = async(e) => {
+  useEffect(() => {
+    const selectedLocations = JSON.parse(
+      localStorage.getItem("selectedLocations")
+    );
+    
+    if(selectedLocations){
+      setOrigin(selectedLocations.origin)
+      setDestination(selectedLocations.destination)
+    }
+  }, []);
+
+  const submitHandler = async (e) => {
     e.preventDefault();
 
-    const serverUrl = import.meta.env.VITE_SERVER_URL;
-    const res = await axios.get(`${serverUrl}/rides/fare?origin=${origin}&destination=${destination}`,{
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem("token")}`,
-      },
-    });
+    const selectedLocations = {
+      origin,
+      destination,
+    };
 
-    if(res.status == 200){
-      setridedata((prev) => (
-        {
-          ...prev,
-          origin : origin,
-          destination : destination,
-          fare : res.data,
-        }
-      ));
+    localStorage.setItem(
+      "selectedLocations",
+      JSON.stringify(selectedLocations)
+    );
+
+    const serverUrl = import.meta.env.VITE_SERVER_URL;
+    const res = await axios.get(
+      `${serverUrl}/rides/fare?origin=${origin}&destination=${destination}`,
+      {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      }
+    );
+
+    if (res.status == 200) {
+      setridedata((prev) => ({
+        ...prev,
+        origin: origin,
+        destination: destination,
+        fare: res.data,
+      }));
       setno(2);
     }
-    
   };
 
   const originRef = useRef();
@@ -37,8 +58,8 @@ const SelectLocations = ({ setno , setridedata }) => {
 
   return (
     <div
-      className={`${isfull ? "h-[90vh]" : "h-60"} transition-all duration-500`}
-      onClick={() => setisfull(true)}
+      className={`${isFull ? "h-[90vh]" : "h-60"} transition-all duration-500`}
+      onClick={() => setIsFull(true)}
     >
       <div>
         <h2 className="text-2xl font-semibold">Find a ride</h2>
@@ -49,7 +70,7 @@ const SelectLocations = ({ setno , setridedata }) => {
             placeholder="Where are you?"
             value={origin}
             onChange={(e) => {
-              setorigin(e.target.value);
+              setOrigin(e.target.value);
             }}
             required
             ref={originRef}
@@ -60,7 +81,7 @@ const SelectLocations = ({ setno , setridedata }) => {
             placeholder="Where to?"
             value={destination}
             onChange={(e) => {
-              setdestination(e.target.value);
+              setDestination(e.target.value);
             }}
             required
             ref={destinationRef}
@@ -71,12 +92,12 @@ const SelectLocations = ({ setno , setridedata }) => {
           <div className="absolute top-8 right-4 rounded h-20 w-2 bg-black"></div>
         </form>
       </div>
-      {isfull && (
+      {isFull && (
         <LocationSuggestion
           origin={origin}
-          setorigin={setorigin}
+          setOrigin={setOrigin}
           destination={destination}
-          setdestination={setdestination}
+          setDestination={setDestination}
           originRef={originRef}
           destinationRef={destinationRef}
         />

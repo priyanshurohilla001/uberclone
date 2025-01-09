@@ -27,7 +27,7 @@ const CaptainHome = () => {
       requestAndUpdateLocation(socketId);
       locationIntervalId = setInterval(() => {
         requestAndUpdateLocation(socketId);
-      }, 10 * 1000);
+      }, 30 * 1000);
     }
 
     return () => {
@@ -44,7 +44,7 @@ const CaptainHome = () => {
   console.log(rides);
   return (
     <div className="relative flex flex-col justify-center items-center bg-slate-100 h-screen">
-      <Toaster />
+      
       <h2>Captain Home</h2>
       <ol>
         {rides.map((ride, index) => (

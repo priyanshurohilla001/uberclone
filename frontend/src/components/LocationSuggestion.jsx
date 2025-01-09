@@ -4,9 +4,9 @@ import LocationIcon from "../icons/LocationIcon";
 
 const LocationSuggestion = ({
   origin,
-  setorigin,
+  setOrigin,
   destination,
-  setdestination,
+  setDestination,
   originRef,
   destinationRef,
 }) => {
@@ -61,10 +61,10 @@ const LocationSuggestion = ({
           className="py-3 flex items-center justify-start active:bg-gray-100"
           onClick={() => {
             if (suggestions.type === "origin") {
-              setorigin(suggestion);
+              setOrigin(suggestion);
               destinationRef.current.focus();
             } else {
-              setdestination(suggestion);
+              setDestination(suggestion);
               originRef.current.focus();
             }
           }}

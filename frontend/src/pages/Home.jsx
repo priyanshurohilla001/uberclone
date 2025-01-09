@@ -3,7 +3,6 @@ import SelectLocations from "../components/SelectLocations";
 import SelectFare from "../components/SelectFare";
 import ConfirmRide from "../components/ConfirmRide";
 import LookingDriver from "../components/LookingDriver";
-import { socket } from "../socket";
 
 const components = {
   1: SelectLocations,
@@ -15,10 +14,6 @@ const components = {
 const Home = () => {
   const [no, setno] = useState(1);
   const CurrentComponent = components[no];
-
-  socket.on("test", (test) => {
-    console.log("test done success ",test);
-  });
 
   const [ridedata, setridedata] = useState({
     origin: "",

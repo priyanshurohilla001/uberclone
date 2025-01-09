@@ -3,6 +3,7 @@ const router = Router();
 import { query, body } from "express-validator";
 import { authCaptain, authUser } from "../middlewares/auth.middleware.js";
 import {
+  captainCurrentRide,
   changeStatusTo,
   createRideController,
   getFareController,
@@ -27,6 +28,7 @@ router.post(
   authUser,
   createRideController
 );
+
 
 router.post(
   "/search",

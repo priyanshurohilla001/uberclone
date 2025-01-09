@@ -1,7 +1,6 @@
 import { getAddressCoordinates, getDistTime } from "./maps.service.js";
 import captainModel from "../modals/captain.modal.js";
 import rideModel from "../modals/ride.modal.js";
-import { io } from "../server.js";
 
 export const getfare = async (origin, destination) => {
   if (!origin || !destination) {
@@ -50,3 +49,4 @@ export async function createRide({ user, origin, destination, vehicleType }) {
     throw new Error(error.message);
   }
 }
+

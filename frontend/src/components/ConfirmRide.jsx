@@ -1,8 +1,38 @@
 import React from "react";
+import axios from "axios";
+import toast from "react-hot-toast";
 
 const ConfirmRide = ({ ridedata, setridedata }) => {
-  const onConfirmRide = () => {
-    console.log("Ride Confirmed");
+  const onConfirmRide = async () => {
+    const { origin, destination, vehicleType } = ridedata;
+    try {
+      const serverUrl = import.meta.env.VITE_SERVER_URL;
+      const token = localStorage.getItem("token");
+      const res = await axios.post(
+        `${serverUrl}/rides/create`,
+        {
+          origin,
+          destination,
+          vehicleType,
+        },
+        {
+          headers: {
+            Authorization: `bearer ${token}`,
+          },
+        }
+      );
+
+      console.log(res.data);
+
+      if (res.status != 201) {
+        return toast.error("Ride creation failed");
+      }
+
+      toast.success("Ride created");
+    } catch (error) {
+      toast.error(error);
+      console.log(error);
+    }
   };
   return (
     <div className="flex flex-col justify-center items-start gap-4 py-4">
@@ -30,7 +60,9 @@ const ConfirmRide = ({ ridedata, setridedata }) => {
           <GearIcon />
         </div>
         <div className="col-span-5">
-          <h3 className="font-semibold">{ridedata.vehicleType ? ridedata.vehicleType : "Default Vehicle"}</h3>
+          <h3 className="font-semibold">
+            {ridedata.vehicleType ? ridedata.vehicleType : "Default Vehicle"}
+          </h3>
           <div className="w-full h-0.5 mt-3 bg-gray-100" />
         </div>
       </div>
@@ -39,10 +71,18 @@ const ConfirmRide = ({ ridedata, setridedata }) => {
           <RuppeIcon />
         </div>
         <div className="col-span-5">
-          <h3 className="font-semibold">₹{ridedata.fare && ridedata.vehicleType ? ridedata.fare[ridedata.vehicleType] : 0} </h3>
+          <h3 className="font-semibold">
+            ₹
+            {ridedata.fare && ridedata.vehicleType
+              ? ridedata.fare[ridedata.vehicleType]
+              : 0}{" "}
+          </h3>
         </div>
       </div>
-      <button className="bg-black mt-6 rounded text-white w-full p-4 font-semibold" onClick={onConfirmRide}>
+      <button
+        className="bg-black mt-6 rounded text-white w-full p-4 font-semibold"
+        onClick={onConfirmRide}
+      >
         Confirm Ride
       </button>
     </div>

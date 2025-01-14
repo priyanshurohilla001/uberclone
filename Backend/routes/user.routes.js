@@ -1,7 +1,14 @@
 import { Router } from "express";
 const router = Router();
 import { body } from "express-validator";
-import { registerUserController, loginUserController, getUserProfileController, logoutUserController } from "../controllers/user.controller.js";
+import {
+  registerUserController,
+  loginUserController,
+  getUserProfileController,
+  logoutUserController,
+  userCurrentRideController,
+  updateLocationSocketController
+} from "../controllers/user.controller.js";
 import { authUser } from "../middlewares/auth.middleware.js";
 
 router.post(
@@ -35,6 +42,30 @@ router.post(
 
 router.get("/profile", authUser, getUserProfileController);
 
-router.get("/logout", authUser, logoutUserController);
+router.post("/logout", authUser, logoutUserController);
+
+router.get("/currentride", authUser, userCurrentRideController);
+
+router.post(
+  "/updateLocationSocket",
+  [
+    body("socketId")
+      .isLength({
+        min: 20,
+        max: 20,
+      })
+      .withMessage("Invalid Socket id"),
+    body("location.lat").isNumeric({
+      min: -90,
+      max: 90,
+    }),
+    body("location.lng").isNumeric({
+      min: -180,
+      max: 180,
+    }),
+  ],
+  authUser,
+  updateLocationSocketController
+);
 
 export default router;

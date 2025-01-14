@@ -24,7 +24,7 @@ const rideSchema = Schema({
   },
   status: {
     type: String,
-    enum: ["pending", "accepted", "ongoing" , "completed", "cancelled"],
+    enum: ["pending", "accepted", "ongoing", "completed", "cancelled"],
     default: "pending",
   },
   otp: {
@@ -32,10 +32,14 @@ const rideSchema = Schema({
     required: true,
     select: false,
   },
-  createdAt : {
-    type : Date ,
-    default : Date.now()
-  }
+  createdAt: {
+    type: Date,
+    default: () => Date.now(),
+  },
+  radMul: {
+    type: Number,
+    default: 1,
+  },
 });
 
 export default model("ride", rideSchema);

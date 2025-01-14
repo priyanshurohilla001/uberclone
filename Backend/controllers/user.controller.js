@@ -3,6 +3,8 @@ import { createUser } from "../services/user.service.js";
 import { validationResult } from "express-validator";
 import jwt from "jsonwebtoken";
 import BlacklistTokenModel from "../modals/blacklistToken.modal.js";
+import captainModel from "../modals/captain.modal.js";
+import rideModal from "../modals/ride.modal.js";
 
 export async function registerUserController(req, res, next) {
   const errors = validationResult(req);
@@ -65,12 +67,69 @@ export async function getUserProfileController(req, res, next) {
   return res.status(200).json(req.user);
 }
 
-export async function logoutUserController(req, res, next) {
-  res.clearCookie("token");
-
+export async function logoutUserController(req, res) {
   const token = req.cookies.token || req.headers.authorization?.split(" ")[1];
 
-  await BlacklistTokenModel.create({ token });
+  try {
+    await BlacklistTokenModel.create({ token });
+    res.clearCookie("token");
+    return res.status(200).json({ msg: "Logged out successfully" });
+  } catch (error) {
+    return res
+      .status(500)
+      .json({ msg: "Error blacklisting token", error: error.message });
+  }
+}
 
-  res.status(200).json({ message: "Logged out" });
+export async function userCurrentRideController(req, res) {
+  const user = req.user;
+  const userId = user._id;
+
+  try {
+    const ride = await rideModal
+      .findOne({
+        user: userId,
+        status: ["pending", "accepted", "ongoing"],
+      }).select("+otp")
+      .lean();
+
+    if (!ride) {
+      return res.status(400).json({ msg: "User have no current active ride" });
+    }
+
+    const captain = await captainModel.findById(ride.captain).lean();
+
+    const rideData = { ...ride, captain, user };
+
+    return res.status(200).json(rideData);
+  } catch (error) {
+    return res.status(500).json({ errors: error.message });
+  }
+}
+
+export async function updateLocationSocketController(req, res) {
+  const errors = validationResult(req);
+
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+
+  const { id } = req.user;
+  const { socketId, location } = req.body;
+
+  try {
+    await userModel.updateOne(
+      { _id: id },
+      {
+        socketId: socketId,
+        location: location,
+      }
+    );
+
+    return res
+      .status(200)
+      .json({ message: "Location and socket id updated Successfully" });
+  } catch (error) {
+    return res.status(400).json({ errors: error });
+  }
 }

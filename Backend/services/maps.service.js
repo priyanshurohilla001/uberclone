@@ -82,7 +82,10 @@ export async function getSuggestions(query, location) {
   }
 }
 
-export async function getCaptainInArea(lat, lng , vehicleType) {
+export async function getCaptainInArea({lat, lng , vehicleType , radMul}) {
+
+  const radiusMultiplier = radMul || 1 ;
+
   // Check if latitude and longitude are within valid ranges
   if (lat < -90 || lat > 90 || lng < -180 || lng > 180) {
     throw new Error("Provide coordinates in a proper format");
@@ -93,7 +96,7 @@ export async function getCaptainInArea(lat, lng , vehicleType) {
       "vehicle.vehicleType": vehicleType,
       location: {
         $geoWithin: {
-          $centerSphere: [[lat, lng], 10 / 6378.1],
+          $centerSphere: [[lat, lng], (5*radiusMultiplier) / 6378.1],
         },
       },
     });

@@ -28,6 +28,14 @@ const userSchema = new Schema({
   socketId: {
     type: String,
   },
+  location: {
+    lat: {
+      type: Number,
+    },
+    lng: {
+      type: Number,
+    },
+  },
 });
 
 userSchema.methods.generateAuthToken = function () {

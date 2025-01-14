@@ -4,6 +4,7 @@ import uberLogoBlack from "../assets/uberLogoDark.png";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { UserDataContext } from "../contexts/UserContext";
+import { handleError } from "@/utils/errorHandler";
 
 const UserLogin = () => {
   const [email, setemail] = useState("");
@@ -23,17 +24,20 @@ const UserLogin = () => {
 
     const serverUrl = import.meta.env.VITE_SERVER_URL;
 
-    const response = await axios.post(`${serverUrl}/users/login`, loginData);
+    try {
+      const response = await axios.post(`${serverUrl}/users/login`, loginData);
+      if (response.status === 200) {
+        setuser(response.data.user);
 
-    if (response.status === 200) {
-      setuser(response.data.user);
+        localStorage.setItem("token", response.data.token);
 
-      localStorage.setItem("token", response.data.token);
-
-      navigate("/home");
+        navigate("/home");
+      }
+      setemail("");
+      setpassword("");
+    } catch (error) {
+      handleError(error);
     }
-    setemail("");
-    setpassword("");
   };
 
   return (

@@ -9,7 +9,7 @@ const ConfirmRide = ({ ridedata, setridedata }) => {
       const serverUrl = import.meta.env.VITE_SERVER_URL;
       const token = localStorage.getItem("token");
       const res = await axios.post(
-        `${serverUrl}/rides/create`,
+        `${serverUrl}/rides/search`,
         {
           origin,
           destination,

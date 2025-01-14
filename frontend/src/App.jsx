@@ -9,8 +9,10 @@ import Home from "./pages/Home";
 import UserProtectedWrapper from "./pages/UserProtectedWrapper";
 import UserLogout from "./pages/UserLogout";
 import CaptainProtectedWrapper from "./pages/CaptainProtectedWrapper";
-import CaptainHome from "./pages/CaptainHome";
+// import CaptainHome from "./pages/CaptainHome";
 import CaptainGotRide from "./pages/CaptainGotRide";
+import CaptainHome from "./pages/CaptainHome";
+import UserHome from "./pages/UserHome";
 
 const App = () => {
   return (
@@ -25,7 +27,8 @@ const App = () => {
           path="/home"
           element={
             <UserProtectedWrapper>
-              <Home />
+              {/* <Home/> */}
+              <UserHome />
             </UserProtectedWrapper>
           }
         />

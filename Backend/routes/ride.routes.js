@@ -8,6 +8,8 @@ import {
   createRideController,
   getFareController,
   searchRideController,
+  userLookingForCaptainController,
+  userCancelRideController
 } from "../controllers/ride.controller.js";
 
 router.post(
@@ -28,7 +30,6 @@ router.post(
   authUser,
   createRideController
 );
-
 
 router.post(
   "/search",
@@ -65,6 +66,8 @@ router.get(
   getFareController
 );
 
+router.get("/lookingForCaptain", authUser, userLookingForCaptainController);
+
 router.post(
   "/changeStatusTo",
   [
@@ -80,6 +83,11 @@ router.post(
   ],
   authCaptain,
   changeStatusTo
+);
+
+router.post(
+  "/cancel",
+  body("rideId").isString().isLength({ min: 24, max: 24 }),authUser , userCancelRideController
 );
 
 export default router;

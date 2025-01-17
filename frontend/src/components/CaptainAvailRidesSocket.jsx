@@ -5,6 +5,8 @@ import { socket } from "@/socket";
 import toast from "react-hot-toast";
 import axios from "axios";
 import NewRideContainer from "./NewRideContainer";
+import { handleError } from "@/utils/errorHandler";
+import CaptainPreviousRides from "./CaptainPreviousRides";
 
 const CaptainAvailRidesSocket = ({ setRide }) => {
   const [socketId, setSocketId] = useState(null);
@@ -53,10 +55,17 @@ const CaptainAvailRidesSocket = ({ setRide }) => {
     };
   }, [socketId]);
 
-  if (rides.length == 0) return null;
+  if (rides.length == 0)
+    return (
+      <div className="flex w-full h-full relative">
+        <CaptainPreviousRides />
+      </div>
+    );
 
   return (
-    <NewRideContainer setRide={setRide} rides={rides} setRides={setRides} />
+    <div>
+      <NewRideContainer setRide={setRide} rides={rides} setRides={setRides} />
+    </div>
   );
 };
 

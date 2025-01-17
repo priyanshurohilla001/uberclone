@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import axios from "axios";
 import toast from "react-hot-toast";
 import SpinLoaderPage from "../components/SpinLoaderPage";
@@ -8,12 +8,14 @@ import CaptainAvailRidesSocket from "@/components/CaptainAvailRidesSocket";
 import { LogOut } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import RideCompleted from "@/components/RideCompleted";
+import { CaptainContextData } from "@/contexts/CaptainContext";
 
 const CaptainGotRide = () => {
   const [ride, setRide] = useState(null);
   const [error, setError] = useState(null);
 
   const navigate = useNavigate();
+
 
   useEffect(() => {
     if (error === null) return;

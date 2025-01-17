@@ -10,26 +10,39 @@ import userModel from "../modals/user.modal.js";
 
 export async function createRideController(req, res) {
   const errors = validationResult(req);
-
   if (!errors.isEmpty()) {
     return res.status(400).json({ errors: errors.array() });
   }
 
-  const user = req.user;
-
   const { origin, destination, vehicleType } = req.body;
 
+  const user = req.user;
+
   try {
-    const ride = await createRide({
-      user,
-      origin,
-      destination,
+    // create a ride in pending state and update all the captains about availability
+    const ride = await createRide({ user, origin, destination, vehicleType });
+
+    const { otp, ...rideWithoutOtp } = ride.toObject();
+
+    const rideData = { ...rideWithoutOtp, user };
+
+    const originCoordinates = await getAddressCoordinates(origin);
+
+    // finding captains near location
+    const captains = await getCaptainInArea({
+      lat: originCoordinates.lat,
+      lng: originCoordinates.lng,
       vehicleType,
     });
 
-    res.status(201).json(ride);
+    captains.forEach((captain) => {
+      io.to(captain.socketId).emit("ridesInArea", rideData);
+    });
+
+    return res.status(200).json(rideData);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error(error);
+    return res.status(500).json({ msg: error.message });
   }
 }
 
@@ -47,51 +60,6 @@ export async function getFareController(req, res) {
     res.status(200).json(fare);
   } catch (error) {
     res.status(500).json({ message: error.message });
-  }
-}
-
-export async function searchRideController(req, res) {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    return res.status(400).json({ errors: errors.array() });
-  }
-
-  const { origin, destination, vehicleType } = req.body;
-
-  const user = req.user;
-
-  try {
-    const originCoordinates = await getAddressCoordinates(origin);
-
-    // finding captains near location
-    const captains = await getCaptainInArea({
-      lat: originCoordinates.lat,
-      lng: originCoordinates.lng,
-      vehicleType,
-    });
-
-    // if no captain found
-    if (captains.length == 0) {
-      return res
-        .status(404)
-        .json({ msg: "No captain is available near you at this moment" });
-    }
-
-    // create a ride in pending state and update all the captains about availability
-    const ride = await createRide({ user, origin, destination, vehicleType });
-
-    const { otp, ...rideWithoutOtp } = ride.toObject();
-
-    const rideData = { ...rideWithoutOtp, user };
-
-    captains.forEach((captain) => {
-      io.to(captain.socketId).emit("ridesInArea", rideData);
-    });
-
-    return res.status(200).json(rideWithoutOtp);
-  } catch (error) {
-    console.error(error);
-    return res.status(400).json({ error: error.message });
   }
 }
 
@@ -132,13 +100,13 @@ export async function changeStatusTo(req, res) {
       const userId = rideData.user;
       const user = await userModel.findById(userId);
 
-      console.log(rideData)
+      console.log(rideData);
 
-      io.to(user.socketId).emit("updateUserRide", { ...rideData, captain });
+      io.to(user.socketId).emit("updateUserRide", { ...rideData, captain , user});
 
       rideData.otp = null;
 
-      return res.status(200).json({ ...rideData, user });
+      return res.status(200).json({ ...rideData, user , captain});
     } catch (error) {
       console.error("Error accepting ride:", error);
       return res
@@ -181,9 +149,9 @@ export async function changeStatusTo(req, res) {
       const userId = rideData.user;
       const user = await userModel.findById(userId);
 
-      io.to(user.socketId).emit("updateUserRide", { ...rideData, user });
+      io.to(user.socketId).emit("updateUserRide", { ...rideData, user , captain});
 
-      return res.status(200).json({ ...rideData, user });
+      return res.status(200).json({ ...rideData, user ,captain});
     } catch (error) {
       console.error("Error starting ride:", error);
       return res
@@ -217,9 +185,9 @@ export async function changeStatusTo(req, res) {
       const userId = rideData.user;
       const user = await userModel.findById(userId);
 
-      io.to(user.socketId).emit("updateUserRide", { ...rideData, captain });
+      io.to(user.socketId).emit("updateUserRide", { ...rideData, captain ,user});
 
-      return res.status(200).json({ ...rideData, user });
+      return res.status(200).json({ ...rideData, user , captain });
     } catch (error) {
       console.error("Error completing ride:", error);
       return res
@@ -256,7 +224,7 @@ export async function changeStatusTo(req, res) {
 
       io.to(user.socketId).emit("Cancelled", "Ride cancelled by captain.");
 
-      return res.status(200).json({ ...rideData, user });
+      return res.status(200).json({ ...rideData, user ,captain});
     } catch (error) {
       console.error("Error cancelling ride:", error);
       return res
@@ -391,7 +359,7 @@ export async function userCancelRideController(req, res) {
       {
         _id: rideId,
         user: user._id,
-        status: ["pending","accepted", "ongoing"],
+        status: ["pending", "accepted", "ongoing"],
       },
       {
         status: "cancelled",
@@ -407,6 +375,8 @@ export async function userCancelRideController(req, res) {
       });
     }
 
-    return res.status(200).json({msg : "Ride cancelled successfully",success : true });
+    return res
+      .status(200)
+      .json({ msg: "Ride cancelled successfully", success: true });
   } catch (error) {}
 }

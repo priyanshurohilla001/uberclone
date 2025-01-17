@@ -7,6 +7,7 @@ import {
   getCaptainProfileController,
   logoutCaptainController,
   updateLocationSocketController,
+  captainAllRidesController
 } from "../controllers/captain.controller.js";
 import { authCaptain } from "../middlewares/auth.middleware.js";
 import { captainCurrentRide } from "../controllers/ride.controller.js";
@@ -83,5 +84,7 @@ router.get(
   authCaptain,
   captainCurrentRide
 );
+
+router.get("/allrides",authCaptain,captainAllRidesController)
 
 export default router;

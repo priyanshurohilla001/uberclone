@@ -7,7 +7,6 @@ import {
   changeStatusTo,
   createRideController,
   getFareController,
-  searchRideController,
   userLookingForCaptainController,
   userCancelRideController
 } from "../controllers/ride.controller.js";
@@ -31,24 +30,6 @@ router.post(
   createRideController
 );
 
-router.post(
-  "/search",
-  [
-    body("origin")
-      .isString()
-      .isLength({ min: 3 })
-      .withMessage("Origin must be a string with at least 3 characters"),
-    body("destination")
-      .isString()
-      .isLength({ min: 3 })
-      .withMessage("Destination must be a string with at least 3 characters"),
-    body("vehicleType")
-      .isIn(["car", "motorcycle", "auto"])
-      .withMessage("Vehicle type must be car, motorcycle or auto"),
-  ],
-  authUser,
-  searchRideController
-);
 
 router.get(
   "/fare",

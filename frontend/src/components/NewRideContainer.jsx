@@ -73,15 +73,15 @@ const NewRideContainer = ({ rides, setRides, setRide }) => {
       {/* Content */}
       <div className="p-4 flex flex-col items-center gap-4 justify-center w-full ">
         <div className="relative flex flex-col gap-3 pl-6 items-start justify-center">
-          <h3 className="text-sm">{origin}</h3>
-          <h3 className="text-sm">{destination}</h3>
+          <h3 className="text-xs">{origin}</h3>
+          <h3 className="text-xs">{destination}</h3>
           <div className="w-0.5 h-[90%] border-r-2 border-dotted border-slate-700 absolute left-2 flex items-center justify-center">
             <h5>
               <ChevronDown />
             </h5>
           </div>
         </div>
-        <div className="flex items-center justify-center gap-3">
+        <div className="flex items-center justify-center gap-3 mt-2">
           <Button size="lg" onClick={onAccept}>
             {isButtonLoading ? (
               <>

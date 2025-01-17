@@ -1,15 +1,17 @@
-import React from "react";
 import axios from "axios";
 import toast from "react-hot-toast";
+import { handleError } from "@/utils/errorHandler";
 
-const ConfirmRide = ({ ridedata, setridedata }) => {
+const ConfirmRide = ({ ridedata, setRide }) => {
   const onConfirmRide = async () => {
     const { origin, destination, vehicleType } = ridedata;
+
+    
     try {
       const serverUrl = import.meta.env.VITE_SERVER_URL;
       const token = localStorage.getItem("token");
       const res = await axios.post(
-        `${serverUrl}/rides/search`,
+        `${serverUrl}/rides/create`,
         {
           origin,
           destination,
@@ -22,16 +24,13 @@ const ConfirmRide = ({ ridedata, setridedata }) => {
         }
       );
 
-      console.log(res.data);
-
-      if (res.status != 201) {
-        return toast.error("Ride creation failed");
-      }
+      localStorage.removeItem("selectedLocations");
+      setRide(res.data)
+      
 
       toast.success("Ride created");
     } catch (error) {
-      toast.error(error);
-      console.log(error);
+      handleError(error)
     }
   };
   return (

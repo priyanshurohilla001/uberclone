@@ -4,10 +4,13 @@ import uberDriverDark from "../assets/uberDriverDark.png";
 import axios from "axios";
 import { CaptainContextData } from "../contexts/CaptainContext";
 import { handleError } from "@/utils/errorHandler";
+import { Button } from "@/components/ui/button";
+import { Loader2 } from "lucide-react";
 
 const CaptainLogin = () => {
   const [email, setemail] = useState("");
   const [pass, setpass] = useState("");
+  const [isButtonLoading, setIsButtonLoading] = useState(false);
 
   const navigate = useNavigate();
 
@@ -18,6 +21,7 @@ const CaptainLogin = () => {
     const serverUrl = import.meta.env.VITE_SERVER_URL;
 
     try {
+      setIsButtonLoading(true);
       const res = await axios.post(`${serverUrl}/captains/login`, {
         email: email,
         password: pass,
@@ -32,6 +36,8 @@ const CaptainLogin = () => {
       setpass("");
     } catch (error) {
       handleError(error);
+    } finally {
+      setIsButtonLoading(false);
     }
   };
 
@@ -49,6 +55,7 @@ const CaptainLogin = () => {
               type="email"
               placeholder="email@example.com"
               value={email}
+              required
               onChange={(e) => {
                 setemail(e.target.value);
               }}
@@ -67,9 +74,20 @@ const CaptainLogin = () => {
               }}
               required
             />
-            <button className="bg-black mt-6 rounded text-white w-full p-4 font-semibold">
-              Login
-            </button>
+            <Button
+              size="lg"
+              disabled={isButtonLoading}
+              className="my-4 w-full rounded"
+            >
+              {isButtonLoading ? (
+                <>
+                  <Loader2 className="animate-spin" />
+                  Verifying ...
+                </>
+              ) : (
+                "Login"
+              )}
+            </Button>
           </form>
           <div className="mt-4">
             <p className="inline-block mr-2">Join a fleet ?</p>

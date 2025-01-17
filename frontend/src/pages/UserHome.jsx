@@ -1,4 +1,5 @@
 import RideCompleted from "@/components/RideCompleted";
+import SpinLoaderPage from "@/components/SpinLoaderPage";
 import UserRideAccepted from "@/components/UserRideAccepted";
 import UserRideOngoing from "@/components/UserRideOngoing";
 import UserWaitingForCaptain from "@/components/UserWaitingForCaptain";
@@ -9,6 +10,7 @@ import { LogOut } from "lucide-react";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
+import UserGotNoRide from "./UserGotNoRide";
 
 const UserHome = () => {
   const [ride, setRide] = useState(null);
@@ -41,6 +43,7 @@ const UserHome = () => {
     }
 
     function updateUserRide(data) {
+      console.log("data in socket :",data)
       setRide(data);
     }
 
@@ -70,7 +73,7 @@ const UserHome = () => {
         );
         setRide(res.data);
       } catch (error) {
-        handleError(error);
+        console.log(error)
       }
     })();
 
@@ -103,10 +106,6 @@ const UserHome = () => {
     }
   }
 
-  // if (!ride) {
-  //   return <SpinLoaderPage />;
-  // }
-
   return (
     <div className="flex h-[100vh] w-full relative  bg-cover object-cover bg-[url('https://miro.medium.com/v2/resize:fit:1400/format:webp/0*gwMx05pqII5hbfmX.gif')]">
       {ride?.status === "pending" ? (
@@ -117,7 +116,7 @@ const UserHome = () => {
         <UserRideOngoing ride={ride} />
       ) : ride?.status === "completed" ? (
         <RideCompleted />
-      ) : null}
+      ) : <UserGotNoRide setRide={setRide} />}
 
       <img
         src="./src/assets/uberLogoDark.png"

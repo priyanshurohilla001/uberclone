@@ -2,6 +2,8 @@ import { validationResult } from "express-validator";
 import captainModel from "../modals/captain.modal.js";
 import { createCaptain } from "../services/captain.service.js";
 import BlacklistTokenModel from "../modals/blacklistToken.modal.js";
+import rideModal from "../modals/ride.modal.js";
+import userModel from "../modals/user.modal.js";
 
 export async function registerCaptainController(req, res, next) {
   const errors = validationResult(req);
@@ -105,4 +107,22 @@ export async function updateLocationSocketController(req, res) {
   return res
     .status(200)
     .json({ message: "Location and socket id updated Successfully" });
+}
+
+export async function captainAllRidesController(req, res) {
+  const captain = req.captain;
+
+  try {
+    const rides = await rideModal
+      .find({
+        captain: captain._id,
+        status: "completed",
+      })
+      .sort({ createdAt: -1 }) // Sort by createdAt in descending order
+      .lean();
+
+    return res.status(200).json(rides);
+  } catch (error) {
+    return res.status(500).json("Interval Server Error");
+  }
 }

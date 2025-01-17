@@ -2,6 +2,7 @@ import React, { useEffect, useRef } from "react";
 import { useState } from "react";
 import LocationSuggestion from "./LocationSuggestion";
 import axios from "axios";
+import { handleError } from "@/utils/errorHandler";
 
 const SelectLocations = ({ setno, setridedata }) => {
   const [isFull, setIsFull] = useState(false);
@@ -12,10 +13,10 @@ const SelectLocations = ({ setno, setridedata }) => {
     const selectedLocations = JSON.parse(
       localStorage.getItem("selectedLocations")
     );
-    
-    if(selectedLocations){
-      setOrigin(selectedLocations.origin)
-      setDestination(selectedLocations.destination)
+
+    if (selectedLocations) {
+      setOrigin(selectedLocations.origin);
+      setDestination(selectedLocations.destination);
     }
   }, []);
 
@@ -32,24 +33,28 @@ const SelectLocations = ({ setno, setridedata }) => {
       JSON.stringify(selectedLocations)
     );
 
-    const serverUrl = import.meta.env.VITE_SERVER_URL;
-    const res = await axios.get(
-      `${serverUrl}/rides/fare?origin=${origin}&destination=${destination}`,
-      {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      }
-    );
+    try {
+      const serverUrl = import.meta.env.VITE_SERVER_URL;
+      const res = await axios.get(
+        `${serverUrl}/rides/fare?origin=${origin}&destination=${destination}`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
 
-    if (res.status == 200) {
-      setridedata((prev) => ({
-        ...prev,
-        origin: origin,
-        destination: destination,
-        fare: res.data,
-      }));
-      setno(2);
+      if (res.status == 200) {
+        setridedata((prev) => ({
+          ...prev,
+          origin: origin,
+          destination: destination,
+          fare: res.data,
+        }));
+        setno(2);
+      }
+    } catch (error) {
+      handleError(error);
     }
   };
 
